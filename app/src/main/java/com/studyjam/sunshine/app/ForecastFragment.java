@@ -2,9 +2,12 @@ package com.studyjam.sunshine.app;
 
 
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,8 +16,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,12 +36,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
+import static android.view.View.OnClickListener;
+
 /**
  * A placeholder fragment containing a simple view.
  */
 public class ForecastFragment extends Fragment {
 
     ArrayAdapter<String> forecastAdapter;
+    FetchWeatherTask weatherTask = new FetchWeatherTask();
 
     public ForecastFragment() {
     }
@@ -59,31 +67,37 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        String[] array = {
-                "Hoje - Sol - 28 / 22",
-                "Amanha - Nublado - 25 / 20",
-                "Terca - Chuva - 22 / 18",
-                "Quarta - Tempestade - 20 / 16",
-                "Quinta - Chuva - 22 / 18",
-                "Sexta - Nublado - 25 / 20"
-        };
-
-        ArrayList<String> data;
-        data = new ArrayList<String>(Arrays.asList(array));
 
         forecastAdapter = new ArrayAdapter<String>(
                 this.getActivity(),
                 R.layout.list_item_forecast, //arquivo que contem o componente
                 R.id.list_item_forecast_textview,//componente
-                data
+                new ArrayList<String>()
         );
-
-
 
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(forecastAdapter);
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String forecast = (String) parent.getItemAtPosition(position);
+
+                Intent detailIntent = new Intent(getActivity(), DetailActivity.class);
+                detailIntent.putExtra(Intent.EXTRA_TEXT, forecast);
+
+                startActivity(detailIntent);
+            }
+        });
+
         return rootView;
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        updateWeather();
     }
 
     @Override
@@ -97,12 +111,22 @@ public class ForecastFragment extends Fragment {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+
+
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            new FetchWeatherTask().execute("94043");
+            updateWeather();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateWeather(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String postalCode = sharedPreferences.getString(
+                getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        weatherTask.execute(postalCode);
     }
 
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]>{
