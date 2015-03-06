@@ -17,4 +17,17 @@
     <string name="pref_location_key" translatable="false">location</string>
     <string name="pref_location_default" translatable="false">94043</string>
 
+    <string name="pref_units_title">Units</string>
+    <string name="pref_units_key" translatable="false">units</string>
+    <string name="pref_units_dialog_title">Units</string>
+    <string-array name="pref_units_entries">
+        <item>Metric</item>
+        <item>Imperial</item>
+    </string-array>
+    <string-array name="pref_units_values" translatable="false">
+        <item>metric</item>
+        <item>imperial</item>
+    </string-array>
+    <string name="pref_units_default">metric</string>
+
 </resources>

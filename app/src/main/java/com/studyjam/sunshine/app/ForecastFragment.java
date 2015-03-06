@@ -100,6 +100,7 @@ public class ForecastFragment extends Fragment {
         updateWeather();
     }
 
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
 //        super.onCreateOptionsMenu(menu, inflater);
@@ -122,6 +123,7 @@ public class ForecastFragment extends Fragment {
     }
 
     private void updateWeather(){
+        weatherTask = new FetchWeatherTask();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String postalCode = sharedPreferences.getString(
                 getString(R.string.pref_location_key),
@@ -173,12 +175,26 @@ public class ForecastFragment extends Fragment {
          * Prepare the weather high/lows for presentation.
          */
         private String formatHighLows(double high, double low) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String units = sharedPreferences.getString(
+                    getString(R.string.pref_units_key),
+                    getString(R.string.pref_units_default));
+
+            if(units.equals(getResources().getStringArray(R.array.pref_units_values)[1])){
+                high = (high*9/5)+32;
+                low = (low*9/5)+32;
+            }
+
             // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
 
             String highLowStr = roundedHigh + "/" + roundedLow;
             return highLowStr;
+        }
+
+        private double convertFromCelsiusToFahrenheit(double celsius){
+            return (celsius*9/5)+32;
         }
 
         /**
