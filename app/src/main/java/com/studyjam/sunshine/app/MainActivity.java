@@ -1,6 +1,9 @@
 package com.studyjam.sunshine.app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -17,13 +20,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    private final String LOG_TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +63,30 @@ public class MainActivity extends ActionBarActivity {
             Intent settingsIntent = new Intent(this, SettingsActivity.class);
 
             startActivity(settingsIntent);
+        }else if(id == R.id.action_view_location){
+            viewLocation();
+
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void viewLocation(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String location = sharedPreferences.getString(
+                getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default)
+        );
+
+        Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+        viewIntent.setData(Uri.parse("geo:0,0").buildUpon().
+                appendQueryParameter("q", location).
+                build()
+        );
+
+        if (viewIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(viewIntent);
+        }
     }
 
 }

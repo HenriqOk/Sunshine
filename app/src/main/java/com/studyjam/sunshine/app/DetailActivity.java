@@ -1,16 +1,17 @@
 package com.studyjam.sunshine.app;
 
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +24,7 @@ public class DetailActivity extends ActionBarActivity {
         setContentView(R.layout.activity_detail);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new DetailFragment())
                     .commit();
         }
     }
@@ -33,6 +34,8 @@ public class DetailActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_detail, menu);
+
+
         return true;
     }
 
@@ -48,6 +51,8 @@ public class DetailActivity extends ActionBarActivity {
             Intent settingsIntent = new Intent(this, SettingsActivity.class);
 
             startActivity(settingsIntent);
+        }else if(id == R.id.action_share){
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -56,21 +61,57 @@ public class DetailActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class DetailFragment extends Fragment {
 
-        public PlaceholderFragment() {
+        private static final String LOG_TAG = DetailFragment.class.getSimpleName();
+        private String forecast;
+
+        public DetailFragment() {
+        }
+
+        @Override
+        public void onCreate (Bundle savedInstanceState){
+            super.onCreate(savedInstanceState);
+
+            Intent intent = getActivity().getIntent();
+
+            if(intent != null && intent.hasExtra(Intent.EXTRA_TEXT)){
+                forecast = intent.getStringExtra(Intent.EXTRA_TEXT);
+            }
+
+            this.setHasOptionsMenu(true);
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-            String forecast = getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT);
 
             ((TextView)rootView.findViewById(R.id.detail_text)).setText(forecast);
 
-            Toast.makeText(getActivity(), forecast, Toast.LENGTH_LONG).show();
             return rootView;
         }
+
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+            super.onCreateOptionsMenu(menu, inflater);
+
+            inflater.inflate(R.menu.detailfragment, menu);
+
+            ShareActionProvider shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menu.findItem(R.id.action_share));
+            shareActionProvider.setShareIntent(createShareIntent());
+
+        }
+
+        private Intent createShareIntent(){
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+
+            shareIntent.putExtra(Intent.EXTRA_TEXT, forecast + "#SunshineApp");
+            shareIntent.setType("text/plain");
+
+            return shareIntent;
+        }
+
     }
 }
