@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -77,6 +78,8 @@ public class DetailActivity extends ActionBarActivity {
 
             if(intent != null && intent.hasExtra(Intent.EXTRA_TEXT)){
                 forecast = intent.getStringExtra(Intent.EXTRA_TEXT);
+            }else{
+                Log.d(LOG_TAG, "Activity's intent is null");
             }
 
             this.setHasOptionsMenu(true);
@@ -100,7 +103,12 @@ public class DetailActivity extends ActionBarActivity {
             inflater.inflate(R.menu.detailfragment, menu);
 
             ShareActionProvider shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menu.findItem(R.id.action_share));
-            shareActionProvider.setShareIntent(createShareIntent());
+
+            if(shareActionProvider != null){
+                shareActionProvider.setShareIntent(createShareIntent());
+            }else{
+                Log.d(LOG_TAG, "ShareActionProvider is null");
+            }
 
         }
 
